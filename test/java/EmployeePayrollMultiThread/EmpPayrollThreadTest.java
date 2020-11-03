@@ -40,11 +40,11 @@ public class EmpPayrollThreadTest {
 		Instant start = Instant.now();
 		empPayrollThreadObj.addEmployeeToPayrollDB(Arrays.asList(arrayOfEmps));
 		Instant end = Instant.now();
-		log.info("Duration without thread : " + Duration.between(start, end));
+		System.out.println("Duration without thread : " + Duration.between(start, end));
 		Instant threadStart = Instant.now();
 		empPayrollThreadObj.addEmployeeToPayrollWithThreads(Arrays.asList(arrayOfEmps));
 		Instant threadEnd = Instant.now();
-		log.info("Duartion with Thread : "+Duration.between(threadStart, threadEnd));
+		System.out.println("Duartion with Thread : "+Duration.between(threadStart, threadEnd));
 		Assert.assertEquals(11, empPayrollThreadObj.countEntries(IOService.DB_IO));
 	}
 }
