@@ -10,10 +10,13 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class EmpPayrollDBServiceThread {
-	private static EmpPayrollDBServiceThread employeePayrollDBServiceObj;
+	private static Logger log = Logger.getLogger(EmpPayrollDBServiceThread.class.getName());
+	private int connectionCounter = 0;
 	private PreparedStatement preparedStmt;
+	private static EmpPayrollDBServiceThread employeePayrollDBServiceObj;
 
 	public static EmpPayrollDBServiceThread getInstance() {
 		if (employeePayrollDBServiceObj == null)
@@ -22,18 +25,17 @@ public class EmpPayrollDBServiceThread {
 	}
 
 	// Loading Driver and getting connection object
-	private Connection getConnection() throws CustomThreadException {
-		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service";
+	private synchronized Connection getConnection() throws SQLException {
+		connectionCounter++;
+		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
 		String userName = "root";
 		String password = "Kumar@12345";
-		Connection con;
-
-		try {
-			con = DriverManager.getConnection(jdbcURL, userName, password);
-		} catch (SQLException e) {
-			throw new CustomThreadException("Error!!! Unable to establish the Connection with JDBC");
-		}
-		return con;
+		Connection connection;
+		log.info("Processing Thread : " + Thread.currentThread().getName() + "Connecting to database : " + jdbcURL);
+		connection = DriverManager.getConnection(jdbcURL, userName, password);
+		log.info("Processing Thread : " + Thread.currentThread().getName() + " ID : " + connectionCounter
+				+ " Connection is successful! " + connection);
+		return connection;
 	}
 
 	public List<Employee> readData() throws CustomThreadException {
@@ -56,25 +58,26 @@ public class EmpPayrollDBServiceThread {
 		return employeePayrollList;
 	}
 
-	public Employee addEmployeeToPayrollDB(int emp_id, String name, String gender, double salary, LocalDate startDate) throws CustomThreadException {
+	public Employee addEmployeeToPayrollDB(int emp_id, String name, String gender, double salary, LocalDate startDate)
+			throws CustomThreadException {
 		int employeeId = -1;
-		Employee employeeData = null;
+		Employee employeePayrollData = null;
 		String sql = String.format(
 				"INSERT INTO employee_payroll (name,gender,salary,start) VALUES ('%s','%s','%s','%s')", name, gender,
 				salary, Date.valueOf(startDate));
 		try (Connection connection = this.getConnection();) {
-			preparedStmt = connection.prepareStatement(sql);
-			int rowAffected = preparedStmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement preparedstatement = connection.prepareStatement(sql);
+			int rowAffected = preparedstatement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1) {
-				ResultSet resultSet = preparedStmt.getGeneratedKeys();
+				ResultSet resultSet = preparedstatement.getGeneratedKeys();
 				if (resultSet.next())
 					employeeId = resultSet.getInt(1);
 			}
-			employeeData = new Employee(employeeId, name, gender, salary, startDate);
+			employeePayrollData = new Employee(employeeId, name, gender,salary, startDate);
 		} catch (SQLException e) {
-			throw new CustomThreadException("Unable to insert employee data to DB");
+			throw new CustomThreadException("Unable to insert employee data into DB");
 		}
-		return employeeData;
+		return employeePayrollData;
 	}
 
 }
