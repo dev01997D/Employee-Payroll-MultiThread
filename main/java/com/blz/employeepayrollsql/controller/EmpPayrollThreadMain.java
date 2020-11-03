@@ -99,8 +99,10 @@ public class EmpPayrollThreadMain {
 		employeeSalaryMap.forEach((employee, salary) -> {
 			Runnable salaryUpdate = () -> {
 				salaryUpdateStatus.put(employee.hashCode(), false);
+				log.info("Salary being updated : " + Thread.currentThread().getName());
 				this.updateEmployeeSalary(employee, salary);
 				salaryUpdateStatus.put(employee.hashCode(), true);
+				log.info("Salary updated : " + Thread.currentThread().getName());
 			};
 			Thread thread = new Thread(salaryUpdate, employee);
 			thread.start();
@@ -112,6 +114,7 @@ public class EmpPayrollThreadMain {
 				e.printStackTrace();
 			}
 		}
+		log.info("" + this.empPayrollList);
 	}
 
 	public void updateEmployeeSalary(String name, double salary) {
