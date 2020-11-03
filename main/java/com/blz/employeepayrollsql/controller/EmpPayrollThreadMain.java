@@ -93,4 +93,45 @@ public class EmpPayrollThreadMain {
 			return empPayrollList.size();
 		return 0;
 	}
+
+	public void updateSalaryOfMultipleEmployees(Map<String, Double> employeeSalaryMap) {
+		Map<Integer, Boolean> salaryUpdateStatus = new HashMap<>();
+		employeeSalaryMap.forEach((employee, salary) -> {
+			Runnable salaryUpdate = () -> {
+				salaryUpdateStatus.put(employee.hashCode(), false);
+				log.info("Salary being updated : " + Thread.currentThread().getName());
+				this.updateEmployeeSalary(employee, salary);
+				salaryUpdateStatus.put(employee.hashCode(), true);
+				log.info("Salary updated : " + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(salaryUpdate, employee);
+			thread.start();
+		});
+		while (salaryUpdateStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		log.info("" + this.empPayrollList);
+	}
+
+	public void updateEmployeeSalary(String name, double salary) {
+		int result = empPayrollDBServicebj.updateEmployeeData(name, salary);
+		if (result == 0)
+			return;
+		Employee employeeData = this.getEmployeeData(name);
+		if (employeeData != null)
+			employeeData.salary = salary;
+	}
+
+	private Employee getEmployeeData(String name) {
+		return this.empPayrollList.stream().filter(employeeData->employeeData.name.equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
+
+	public boolean checkEmployeePayrollInSyncWithDB(String name) {
+		List<Employee> employeeDataList = empPayrollDBServicebj.getEmployeeData(name);
+		return employeeDataList.get(0).equals(this.getEmployeeData(name));
+	}
 }
