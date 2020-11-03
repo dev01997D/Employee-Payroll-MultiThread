@@ -42,16 +42,16 @@ public class EmpPayrollThreadMain {
 
 	public void addEmployeeToPayrollDB(List<Employee> employeeList) {
 		employeeList.forEach(employeeData -> {
-			System.out.println("Employee being added : " + employeeData.name);
+			log.info("Employee being added : " + employeeData.name);
 			try {
 				this.addEmployeeToPayrollDatabase(employeeData.emp_id, employeeData.name, employeeData.gender,
 						employeeData.salary, employeeData.startDate);
 			} catch (CustomThreadException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Employee added : " + employeeData.name);
+			log.info("Employee added : " + employeeData.name);
 		});
-		System.out.println(this.empPayrollList);
+		log.info("" + this.empPayrollList);
 	}
 
 	public void addEmployeeToPayrollWithThreads(List<Employee> employeePayrollDataList) {
@@ -59,26 +59,28 @@ public class EmpPayrollThreadMain {
 		employeePayrollDataList.forEach(employeePayrollData -> {
 			Runnable task = () -> {
 				employeeAdditionStatus.put(employeePayrollData.hashCode(), false);
-				System.out.println("Employee being added : " + Thread.currentThread().getName());
+				log.info("Employee being added : " + Thread.currentThread().getName());
 				try {
 					this.addEmployeeToPayrollDatabase(employeePayrollData.emp_id, employeePayrollData.name, employeePayrollData.gender,
 							employeePayrollData.salary, employeePayrollData.startDate);
 				} catch (CustomThreadException e) {
 					e.printStackTrace();
 				}
-				employeeAdditionStatus.put(employeePayrollData.hashCode(), true);
-				System.out.println("Employee added : " + Thread.currentThread().getName());
+				employeeAdditionStatus.put(employeePayrollData.hashCode(), true); //Replacing false with true
+				log.info("Employee added : " + Thread.currentThread().getName());
 			};
 			Thread thread = new Thread(task, employeePayrollData.name);
 			thread.start();
 		});
+		
+		//Making to wait main thread till all thread executes
 		while (employeeAdditionStatus.containsValue(false)) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 			}
 		}
-		System.out.println(this.empPayrollList);
+		log.info("" + this.empPayrollList);
 	}
 
 	private void addEmployeeToPayrollDatabase(int emp_id, String name, String gender, double salary,
