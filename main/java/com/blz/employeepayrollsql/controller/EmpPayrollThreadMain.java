@@ -4,7 +4,9 @@
 package com.blz.employeepayrollsql.controller;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.*;
 
 import com.blz.employeepayrollsql.model.CustomThreadException;
@@ -40,16 +42,44 @@ public class EmpPayrollThreadMain {
 
 	public void addEmployeeToPayrollDB(List<Employee> employeeList) {
 		employeeList.forEach(employeeData -> {
-			//log.info("Employee being added : " + employeeData.name);
+			log.info("Employee being added : " + employeeData.name);
 			try {
 				this.addEmployeeToPayrollDatabase(employeeData.emp_id, employeeData.name, employeeData.gender,
 						employeeData.salary, employeeData.startDate);
 			} catch (CustomThreadException e) {
 				e.printStackTrace();
 			}
-			//log.info("Employee added : " + employeeData.name);
+			log.info("Employee added : " + employeeData.name);
 		});
-		//log.info("" + this.empPayrollList);
+		log.info("" + this.empPayrollList);
+	}
+
+	public void addEmployeeToPayrollWithThreads(List<Employee> employeeList) {
+		Map<Integer, Boolean> employeeAdditionStatus = new HashMap<>();
+		employeeList.forEach(employeeData -> {
+			Runnable task = () -> {
+				employeeAdditionStatus.put(employeeData.hashCode(), false);
+				log.info("Employee being added : " + Thread.currentThread().getName());
+				try {
+					this.addEmployeeToPayrollDatabase(employeeData.emp_id, employeeData.name, employeeData.gender,
+							employeeData.salary, employeeData.startDate);
+				} catch (CustomThreadException e) {
+					e.printStackTrace();
+				}
+				employeeAdditionStatus.put(employeeData.hashCode(), true);
+				log.info("Employee added : " + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(task, employeeData.name);
+			thread.start();
+		});
+		while (employeeAdditionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		log.info("" + this.empPayrollList);
 	}
 
 	private void addEmployeeToPayrollDatabase(int emp_id, String name, String gender, double salary,
