@@ -1,6 +1,7 @@
 package com.blz.employeepayrollsql.model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Employee {
 	public int emp_id;
@@ -25,59 +26,26 @@ public class Employee {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Employee other = (Employee) obj;
-		if (address == null) {
-			if (other.address != null)
-				return false;
-		} else if (!address.equals(other.address))
-			return false;
-		if (companyId != other.companyId)
-			return false;
-		if (companyName == null) {
-			if (other.companyName != null)
-				return false;
-		} else if (!companyName.equals(other.companyName))
-			return false;
-		if (deptId != other.deptId)
-			return false;
-		if (deptName == null) {
-			if (other.deptName != null)
-				return false;
-		} else if (!deptName.equals(other.deptName))
-			return false;
-		if (gender == null) {
-			if (other.gender != null)
-				return false;
-		} else if (!gender.equals(other.gender))
-			return false;
-		if (emp_id != other.emp_id)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (startDate == null) {
-			if (other.startDate != null)
-				return false;
-		} else if (!startDate.equals(other.startDate))
-			return false;
-		return true;
+	public int hashCode() {
+		return Objects.hash(emp_id, gender, name, salary, startDate);
 	}
 
 	@Override
-	public String toString() {
-		return "Employee [id=" + emp_id + ", salary=" + salary + ", name=" + name + ", address=" + address + ", startDate="
-				+ startDate + ", gender=" + gender + ", companyName=" + companyName + ", companyId=" + companyId
-				+ ", deptId=" + deptId + ", deptName=" + deptName + ", is_active=" + is_active + "]";
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Employee))
+			return false;
+		Employee other = (Employee) obj;
+		return emp_id == other.emp_id && Objects.equals(gender, other.gender) && Objects.equals(name, other.name)
+				&& Double.doubleToLongBits(salary) == Double.doubleToLongBits(other.salary)
+				&& Objects.equals(startDate, other.startDate);
 	}
-	
 
+
+	@Override
+	public String toString() {
+		return "Employee [emp_id=" + emp_id + ", salary=" + salary + ", name=" + name + ", startDate=" + startDate
+				+ ", gender=" + gender + "]";
+	}
 }

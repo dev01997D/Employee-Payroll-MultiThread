@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.logging.*;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +19,7 @@ import com.blz.employeepayrollsql.model.CustomThreadException;
 import com.blz.employeepayrollsql.model.Employee;
 
 public class EmpPayrollThreadTest {
+	private static Logger log = Logger.getLogger(EmpPayrollThreadTest.class.getName());
 	EmpPayrollThreadMain empPayrollThreadObj = null;
 
 	// Using table employee_payroll and payroll_details from payroll_service DB
@@ -38,7 +40,11 @@ public class EmpPayrollThreadTest {
 		Instant start = Instant.now();
 		empPayrollThreadObj.addEmployeeToPayrollDB(Arrays.asList(arrayOfEmps));
 		Instant end = Instant.now();
-		System.out.println("Duration without thread : " + Duration.between(start, end));
-		Assert.assertEquals(5, empPayrollThreadObj.countEntries(IOService.DB_IO));
+		log.info("Duration without thread : " + Duration.between(start, end));
+		Instant threadStart = Instant.now();
+		empPayrollThreadObj.addEmployeeToPayrollWithThreads(Arrays.asList(arrayOfEmps));
+		Instant threadEnd = Instant.now();
+		log.info("Duartion with Thread : "+Duration.between(threadStart, threadEnd));
+		Assert.assertEquals(11, empPayrollThreadObj.countEntries(IOService.DB_IO));
 	}
 }
