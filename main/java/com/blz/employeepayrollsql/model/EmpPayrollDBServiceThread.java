@@ -31,7 +31,7 @@ public class EmpPayrollDBServiceThread {
 		String userName = "root";
 		String password = "Kumar@12345";
 		Connection connection;
-		log.info("Processing Thread : " + Thread.currentThread().getName() + "Connecting to database : " + jdbcURL);
+		log.info("Processing Thread : " + Thread.currentThread().getName() + " Connecting to database : " + jdbcURL);
 		connection = DriverManager.getConnection(jdbcURL, userName, password);
 		log.info("Processing Thread : " + Thread.currentThread().getName() + " ID : " + connectionCounter
 				+ " Connection is successful! " + connection);
@@ -58,7 +58,7 @@ public class EmpPayrollDBServiceThread {
 		return employeePayrollList;
 	}
 
-	public Employee addEmployeeToPayrollDB(int emp_id, String name, String gender, double salary, LocalDate startDate)
+	public synchronized Employee addEmployeeToPayrollDB(int emp_id, String name, String gender, double salary, LocalDate startDate)
 			throws CustomThreadException {
 		int employeeId = -1;
 		Employee employeePayrollData = null;
